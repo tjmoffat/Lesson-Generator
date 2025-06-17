@@ -3,233 +3,460 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EAL Lesson Generator</title>
+  <title>Lex Lesson Generator</title>
   <style>
-    label { font-weight: 600; }
-    .section-title { margin-top: 1.6em; font-size: 1.15em; text-decoration: underline; }
+    body {
+      font-family: 'San Francisco', 'Segoe UI', Arial, sans-serif;
+      background-color: #e6f4ff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    h1 {
+      color: #007acc;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-align: center;
+    }
+
+    form {
+      background: white;
+      padding: 2.3rem 2.6rem 2.5rem 2.6rem;
+      border-radius: 2.3rem;
+      box-shadow: 0 6px 36px rgba(0,0,0,0.13), 0 1.5px 8px rgba(0,0,0,0.07);
+      max-width: 720px;
+      width: 100%;
+      margin-bottom: 2.1rem;
+      margin-top: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 1.5px solid #cce0f9;
+    }
+
+    label {
+      display: block;
+      margin-top: 1.1rem;
+      margin-bottom: 0.23rem;
+      font-weight: 600;
+      width: 100%;
+      color: #35598d;
+      letter-spacing: 0.02em;
+    }
+
+    select, input, textarea {
+      width: 100%;
+      padding: 0.63rem;
+      border-radius: 1.35rem;
+      border: 1.1px solid #b0cfee;
+      font-size: 1rem;
+      box-sizing: border-box;
+      margin-bottom: 0.2rem;
+      background: #f9fcff;
+      transition: box-shadow 0.13s;
+    }
+    select:focus, input:focus, textarea:focus {
+      outline: none;
+      border: 1.5px solid #007acc;
+      box-shadow: 0 0 0 2px #d7efff;
+      background: #f5faff;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 2.2em;
+      max-height: 7em;
+    }
+    .row {
+      display: flex;
+      gap: 1.13rem;
+      width: 100%;
+    }
+    .half {
+      width: 50%;
+    }
+    .optional-label {
+      font-weight: normal;
+      color: #6a879f;
+      font-size: 0.97em;
+    }
+    .button-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-top: 1.65rem;
+      margin-bottom: 0.7rem;
+    }
+    button {
+      padding: 1rem 2.4rem;
+      background-color: #0097e6;
+      color: white;
+      border: none;
+      border-radius: 2rem;
+      font-size: 1.11rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2.5px 13px rgba(80,170,245,0.15);
+      transition: background 0.18s, box-shadow 0.18s;
+      letter-spacing: 0.03em;
+    }
+    button:hover {
+      background-color: #007acc;
+      box-shadow: 0 5px 16px rgba(80,170,245,0.18);
+    }
+    #loading, #errorMessage, #validationError {
+      margin-top: 1.8rem;
+      padding: 1.12rem;
+      font-weight: bold;
+      border-radius: 1.5rem;
+      display: none;
+      text-align: center;
+      font-size: 1.13rem;
+      box-shadow: 0 2px 9px rgba(0,0,0,0.10);
+    }
+    #loading {
+      background-color: #e3f1fb;
+      color: #00638f;
+      display: none; /* HIDDEN BY DEFAULT */
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      border: 1.1px solid #b7d7ef;
+      /* Apple style */
+      box-shadow: 0 5px 22px rgba(60,130,200,0.11);
+    }
+    .lex-spinner-head {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 0.18rem;
+    }
+    .spinner {
+      margin-bottom: 0.48rem;
+      display: inline-block;
+      width: 38px;
+      height: 38px;
+      border: 4px solid #b0cfee;
+      border-top: 4px solid #007acc;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+    .lex-head-svg {
+      margin-bottom: 0.3rem;
+      width: 45px;
+      height: 45px;
+      display: block;
+    }
+    #errorMessage, #validationError {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1.1px solid #eebbbb;
+    }
+    #lessonOutput {
+      white-space: pre-wrap;
+      margin-top: 2.4rem;
+      background: white;
+      padding: 2.1rem 2rem;
+      border-radius: 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.14);
+      max-width: 900px;
+      font-size: 1.06rem;
+      line-height: 1.62;
+      border: 1.1px solid #cce0f9;
+      word-break: break-word;
+    }
+    @media (max-width: 800px) {
+      form {
+        padding: 1.2rem 0.4rem;
+      }
+      .row {
+        flex-direction: column;
+        gap: 0.3rem;
+      }
+      .half {
+        width: 100%;
+      }
+      #lessonOutput {
+        padding: 1.2rem 0.5rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>EAL Lesson Generator</h1>
+  <h1>Lex Lesson Generator</h1>
   <form id="lessonForm">
     <!-- LESSON SETUP -->
-    <div class="section-title">Lesson Setup</div>
-    <label for="primaryFocus">Primary Focus</label>
-    <select id="primaryFocus" name="primaryFocus" required>
-      <option>Reading</option>
-      <option>Writing</option>
-      <option>Listening</option>
-      <option>Speaking</option>
-      <option>Grammar</option>
-    </select><br/>
+    <div class="row">
+      <div class="half">
+        <label for="primaryFocus">Primary Focus</label>
+        <select id="primaryFocus" name="primaryFocus" required>
+          <option value="">Select Primary Focus</option>
+          <option>Reading</option>
+          <option>Writing</option>
+          <option>Listening</option>
+          <option>Speaking</option>
+          <option>Grammar</option>
+        </select>
+      </div>
+      <div class="half">
+        <label for="secondaryFocus">Secondary Focus <span class="optional-label">(optional)</span></label>
+        <select id="secondaryFocus" name="secondaryFocus">
+          <option value="">None</option>
+          <option>Reading</option>
+          <option>Writing</option>
+          <option>Listening</option>
+          <option>Speaking</option>
+          <option>Grammar</option>
+        </select>
+      </div>
+    </div>
 
-    <label for="secondaryFocus">Secondary Focus (optional)</label>
-    <select id="secondaryFocus" name="secondaryFocus">
-      <option value="">None</option>
-      <option>Reading</option>
-      <option>Writing</option>
-      <option>Listening</option>
-      <option>Speaking</option>
-      <option>Grammar</option>
-    </select><br/>
+    <div class="row">
+      <div class="half">
+        <label for="framework">Language Proficiency Framework</label>
+        <select id="framework" name="framework" required>
+          <option value="">Select Framework</option>
+          <option value="CEFR">CEFR</option>
+          <option value="IELTS">IELTS</option>
+          <option value="TOEFL">TOEFL</option>
+          <option value="Cambridge">Cambridge</option>
+          <option value="CLB">CLB</option>
+          <option value="ACTFL">ACTFL</option>
+          <option value="GSE">GSE</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="half">
+        <label for="level">Language Level</label>
+        <select id="level" name="level" required>
+          <option value="">Select Level</option>
+        </select>
+        <input type="text" id="levelOther" name="levelOther" style="display:none; margin-top:7px;" placeholder="Please specify level"/>
+      </div>
+    </div>
 
-    <label for="framework">Language Proficiency Framework</label>
-    <select id="framework" name="framework" onchange="updateLevelOptions();toggleCustomFramework()">
-      <option value="CEFR">CEFR</option>
-      <option value="IELTS">IELTS</option>
-      <option value="Cambridge">Cambridge</option>
-      <option value="TOEFL">TOEFL</option>
-      <option value="CLB">CLB</option>
-      <option value="ACTFL">ACTFL</option>
-      <option value="GSE">GSE</option>
-      <option value="Other">Other</option>
-    </select>
-    <input type="text" id="customFramework" name="customFramework" placeholder="Please specify framework" style="display:none;"><br/>
+    <div class="row">
+      <div class="half">
+        <label for="ageGroup">Age Group</label>
+        <select id="ageGroup" name="ageGroup">
+          <option value="">Select Age Group</option>
+          <option>Early Primary (4–6)</option>
+          <option>Primary (7–10)</option>
+          <option>Secondary (11–14)</option>
+          <option>Upper Secondary (15–18)</option>
+          <option>Adults (18+)</option>
+        </select>
+      </div>
+      <div class="half">
+        <label for="classSize">Class Size</label>
+        <input type="number" id="classSize" name="classSize" min="1" max="60" required/>
+      </div>
+    </div>
 
-    <label for="level">Language Level</label>
-    <select id="level" name="level">
-      <!-- Options will be filled dynamically -->
-    </select>
-    <input type="text" id="customLevel" name="customLevel" placeholder="Please specify level" style="display:none;"><br/>
+    <div class="row">
+      <div class="half">
+        <label for="duration">Duration (mins)</label>
+        <select id="duration" name="duration">
+          <option value="">Select Duration</option>
+          <option>30</option>
+          <option>45</option>
+          <option>60</option>
+          <option>90</option>
+          <option>120</option>
+          <option value="Other">Other</option>
+        </select>
+        <input type="text" id="durationOther" name="durationOther" style="display:none; margin-top:7px;" placeholder="Please specify duration"/>
+      </div>
+    </div>
 
-    <label for="ageGroup">Age Group</label>
-    <select id="ageGroup" name="ageGroup">
-      <option>Early Primary (4–6)</option>
-      <option>Primary (7–10)</option>
-      <option>Secondary (11–14)</option>
-      <option>Upper Secondary (15–18)</option>
-      <option>Adults (18+)</option>
-    </select><br/>
+    <!-- LESSON CONTENT -->
+    <h3 style="margin-top:2.6rem; margin-bottom:0.65rem; color:#007acc;">Lesson Content (Optional)</h3>
+    <label for="title">Lesson Title</label>
+    <input type="text" id="title" name="title" placeholder="e.g. A Day Without Technology" />
 
-    <label for="classSize">Class Size</label>
-    <input type="number" id="classSize" name="classSize" min="1"><br/>
+    <label for="topic">Lesson Topic</label>
+    <input type="text" id="topic" name="topic" placeholder="e.g. Environment, Food, Travel" />
 
-    <label for="duration">Duration</label>
-    <select id="duration" name="duration" onchange="toggleDurationOther()">
-      <option>30 mins</option>
-      <option>45 mins</option>
-      <option>60 mins</option>
-      <option>90 mins</option>
-      <option>120 mins</option>
-      <option value="Other">Other</option>
-    </select>
-    <input type="text" id="customDuration" name="customDuration" placeholder="Please specify duration" style="display:none;"><br/>
+    <label for="learningObjectives">Learning Objectives</label>
+    <textarea id="learningObjectives" name="learningObjectives" rows="2" placeholder="e.g. Students will be able to describe..."></textarea>
 
-    <!-- CONTENT (OPTIONAL) -->
-    <div class="section-title">Content (Optional)</div>
-    <label for="title">Title</label>
-    <input type="text" id="title" name="title" placeholder="e.g. A Day Without Technology"><br/>
-
-    <label for="topic">Topic</label>
-    <input type="text" id="topic" name="topic" placeholder="e.g. Environment, Food, Travel, Friendship"><br/>
-
-    <label for="objectives">Learning Objectives</label><br/>
-    <textarea id="objectives" name="objectives" rows="2" placeholder="e.g. Students will be able to describe..."></textarea><br/>
-
-    <label for="targetVocab">Target Vocabulary</label><br/>
-    <textarea id="targetVocab" name="targetVocab" rows="2" placeholder="e.g. sustainable, renewable energy, climate change"></textarea><br/>
+    <label for="targetVocabulary">Target Vocabulary <span class="optional-label">(optional)</span></label>
+    <textarea id="targetVocabulary" name="targetVocabulary" rows="2" placeholder="e.g. Sustainable, renewable energy, climate change"></textarea>
 
     <!-- CUSTOMISATION -->
-    <div class="section-title">Customisation (Optional)</div>
+    <h3 style="margin-top:2.2rem; margin-bottom:0.62rem; color:#007acc;">Customisation (Optional)</h3>
     <label for="curriculumAlignment">Curriculum Alignment</label>
-    <input type="text" id="curriculumAlignment" name="curriculumAlignment" placeholder="e.g. Cambridge IGCSE, IB MYP, Edexcel Functional Skills"><br/>
+    <input type="text" id="curriculumAlignment" name="curriculumAlignment" placeholder="e.g. Cambridge IGCSE, IB MYP" />
 
-    <label for="studentBackground">Student Background</label><br/>
-    <textarea id="studentBackground" name="studentBackground" rows="2" placeholder="e.g. The majority are first language Mandarin speakers, studying at an international school in Kuala Lumpur, Malaysia"></textarea><br/>
+    <label for="studentBackground">Student Background</label>
+    <textarea id="studentBackground" name="studentBackground" rows="2" placeholder="e.g. Majority are first language Mandarin speakers..."></textarea>
 
-    <label for="teacherNotes">Teaching Notes &amp; Pedagogy</label><br/>
-    <textarea id="teacherNotes" name="teacherNotes" rows="2" placeholder="e.g. pedagogical approach, prior learning, differentiation requirements"></textarea><br/>
+    <label for="teachingNotes">Teaching Notes &amp; Pedagogy</label>
+    <textarea id="teachingNotes" name="teachingNotes" rows="2" placeholder="e.g. Consider prior learning, differentiation requirements..."></textarea>
 
-    <!-- ... (rest of your code above stays the same) ... -->
+    <div class="button-wrapper">
+      <button type="submit">Create Lesson</button>
+    </div>
 
-    <button type="submit">Create Lesson</button>
+    <div id="loading">
+      <div class="lex-spinner-head">
+        <svg class="lex-head-svg" viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="26" fill="#d3eafd" stroke="#007acc" stroke-width="2"/>
+          <ellipse cx="32" cy="40" rx="14" ry="8" fill="#fff" />
+          <ellipse cx="24" cy="30" rx="2.7" ry="3" fill="#007acc"/>
+          <ellipse cx="40" cy="30" rx="2.7" ry="3" fill="#007acc"/>
+          <ellipse cx="32" cy="35" rx="5" ry="2" fill="#bee2f8"/>
+          <ellipse cx="32" cy="36.5" rx="2.5" ry="1" fill="#007acc"/>
+        </svg>
+        <span class="spinner"></span>
+      </div>
+      Sit back and relax. I'll be done in no time!
+    </div>
+    <div id="validationError">Please fill in all required fields: Framework, Level, Class Size, and Primary Focus.</div>
+    <div id="errorMessage">Oops! Something went wrong. Please try again in a moment.</div>
   </form>
 
-  <h3>Lesson Plan Output:</h3>
-  <pre id="responseOutput" style="white-space: pre-wrap; border: 1px solid #ccc; padding: 10px;"></pre>
-
-<!-- ... (rest of the code stays the same) ... -->
-
+  <div id="lessonOutput"></div>
 
   <script>
-    // Level options for each framework
-    const levelOptions = {
-      "CEFR": [
-        "A1", "A2", "B1", "B2", "C1"
-      ],
-      "IELTS": [
-        "3.0", "4.0", "5.0", "6.0", "7.0", "8.0"
-      ],
-      "Cambridge": [
-        "A1 Movers", "A2 Key (KET)", "B1 Preliminary (PET)", "B2 First (FCE)", "C1 Advanced (CAE)"
-      ],
-      "TOEFL": [
-        "0–40", "41–50", "51–60", "61–80", "81–100", "101–120"
-      ],
-      "CLB": [
-        "1–2", "3–4", "5–6", "7–8", "9–10", "11–12"
-      ],
-      "ACTFL": [
-        "Novice", "Intermediate", "Advanced", "Superior", "Distinguished", "Other (please specify)"
-      ],
-      "GSE": [
-        "10–29", "30–39", "40–49", "50–59", "60–69", "70–90"
-      ],
-      "Other": [] // triggers customLevel input
+    // Frameworks mapped to banded levels
+    const levelsByFramework = {
+      CEFR: ["A1", "A2", "B1", "B2", "C1"],
+      IELTS: ["2.0–3.5", "4.0–4.5", "5.0–5.5", "6.0–6.5", "7.0–7.5", "8.0–9.0"],
+      TOEFL: ["0–30", "31–40", "41–52", "53–64", "65–78", "79–100"],
+      Cambridge: ["Starters (Pre A1)", "Movers (A1)", "Flyers (A2)", "KET (A2)", "PET (B1)", "FCE (B2)", "CAE (C1)"],
+      CLB: ["1–2", "3–4", "5–6", "7–8", "9–10", "11–12"],
+      ACTFL: ["Novice", "Intermediate", "Advanced", "Superior", "Distinguished"],
+      GSE: ["10–29", "30–42", "43–58", "59–75", "76–90"],
+      Other: []
     };
 
-    // Fill in the initial level options based on default framework (CEFR)
-    function updateLevelOptions() {
+    function updateLevelDropdown() {
       const framework = document.getElementById('framework').value;
-      const level = document.getElementById('level');
-      const customLevel = document.getElementById('customLevel');
-
-      // Remove all previous options
-      level.innerHTML = "";
-
-      if (framework === "Other") {
-        level.style.display = "none";
-        customLevel.style.display = "inline";
+      const levelSelect = document.getElementById('level');
+      const levelOther = document.getElementById('levelOther');
+      levelSelect.innerHTML = '';
+      if (!framework) {
+        levelSelect.innerHTML = '<option value="">Select Level</option>';
+        levelSelect.style.display = 'block';
+        levelOther.style.display = 'none';
+        return;
+      }
+      if (framework === 'Other') {
+        levelSelect.style.display = 'none';
+        levelOther.style.display = 'block';
+        levelOther.value = '';
       } else {
-        level.style.display = "inline";
-        customLevel.style.display = "none";
-        levelOptions[framework].forEach(opt => {
-          const option = document.createElement('option');
-          option.value = opt;
-          option.text = opt;
-          level.add(option);
-        });
+        const levels = levelsByFramework[framework] || [];
+        let options = '<option value="">Select Level</option>';
+        levels.forEach(lvl => options += `<option value="${lvl}">${lvl}</option>`);
+        levelSelect.innerHTML = options;
+        levelSelect.style.display = 'block';
+        levelOther.style.display = 'none';
       }
     }
+    document.getElementById('framework').addEventListener('change', updateLevelDropdown);
 
-    // Show/hide custom framework input if 'Other' selected
-    function toggleCustomFramework() {
-      const framework = document.getElementById('framework');
-      const customInput = document.getElementById('customFramework');
-      if (framework.value === "Other") {
-        customInput.style.display = "inline";
+    document.getElementById('duration').addEventListener('change', function() {
+      if (this.value === "Other") {
+        document.getElementById('durationOther').style.display = 'block';
+        document.getElementById('durationOther').value = '';
       } else {
-        customInput.style.display = "none";
+        document.getElementById('durationOther').style.display = 'none';
       }
-    }
+    });
 
-    // Show/hide custom duration input if 'Other' selected
-    function toggleDurationOther() {
-      const duration = document.getElementById('duration');
-      const customDuration = document.getElementById('customDuration');
-      if (duration.value === "Other") {
-        customDuration.style.display = "inline";
-      } else {
-        customDuration.style.display = "none";
-      }
-    }
-
-    // Fill level options on page load
-    window.onload = function() {
-      updateLevelOptions();
-    };
-
-    // Update level options when framework changes
-    document.getElementById('framework').addEventListener('change', updateLevelOptions);
-
-    // Form submission handler
-    const form = document.getElementById("lessonForm");
-    const output = document.getElementById("responseOutput");
-
-    form.addEventListener("submit", async (e) => {
+    document.getElementById('lessonForm').addEventListener('submit', async function (e) {
       e.preventDefault();
 
-      const formData = {
-        primaryFocus: form.primaryFocus.value,
-        secondaryFocus: form.secondaryFocus.value,
-        framework: form.framework.value === "Other" ? form.customFramework.value : form.framework.value,
-        level: form.customLevel.style.display === "inline" ? form.customLevel.value : form.level.value,
-        ageGroup: form.ageGroup.value,
-        classSize: form.classSize.value,
-        duration: form.duration.value === "Other" ? form.customDuration.value : form.duration.value,
-        title: form.title.value,
-        topic: form.topic.value,
-        objectives: form.objectives.value,
-        targetVocab: form.targetVocab.value,
-        curriculumAlignment: form.curriculumAlignment.value,
-        studentBackground: form.studentBackground.value,
-        teacherNotes: form.teacherNotes.value
-      };
+      // Collect all fields
+      const framework = document.getElementById('framework').value;
+      const levelSelect = document.getElementById('level');
+      const levelOther = document.getElementById('levelOther').value;
+      let level = framework === "Other" ? levelOther : levelSelect.value;
+      const classSize = document.getElementById('classSize').value;
+      const primaryFocus = document.getElementById('primaryFocus').value;
+
+      const secondaryFocus = document.getElementById('secondaryFocus').value;
+      const ageGroup = document.getElementById('ageGroup').value;
+      const durationSelect = document.getElementById('duration');
+      const durationOther = document.getElementById('durationOther').value;
+      let duration = durationSelect.value === "Other" ? durationOther : durationSelect.value;
+
+      const title = document.getElementById('title').value;
+      const topic = document.getElementById('topic').value;
+      const learningObjectives = document.getElementById('learningObjectives').value;
+      const targetVocabulary = document.getElementById('targetVocabulary').value;
+      const curriculumAlignment = document.getElementById('curriculumAlignment').value;
+      const studentBackground = document.getElementById('studentBackground').value;
+      const teachingNotes = document.getElementById('teachingNotes').value;
+
+      const loading = document.getElementById('loading');
+      const errorMessage = document.getElementById('errorMessage');
+      const validationError = document.getElementById('validationError');
+      const output = document.getElementById('lessonOutput');
+
+      // Reset messages
+      loading.style.display = 'none';
+      errorMessage.style.display = 'none';
+      validationError.style.display = 'none';
+      output.innerText = '';
+
+      // Validation: required fields
+      if (!framework || !level || !classSize || !primaryFocus) {
+        validationError.style.display = 'block';
+        return;
+      }
+
+      loading.style.display = 'flex';
 
       try {
-        // !! Update the fetch URL if your backend is NOT on port 3000 !!
-        const res = await fetch("http://localhost:3001/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData)
+        const res = await fetch('http://localhost:3001/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            framework,
+            level,
+            primaryFocus,
+            secondaryFocus,
+            ageGroup,
+            classSize,
+            duration,
+            title,
+            topic,
+            learningObjectives,
+            targetVocabulary,
+            curriculumAlignment,
+            studentBackground,
+            teachingNotes,
+          }),
         });
 
         const data = await res.json();
-        output.textContent = JSON.stringify(data, null, 2);
+        loading.style.display = 'none';
+
+        if (data.lessonPlan) {
+          output.innerText = data.lessonPlan;
+        } else {
+          errorMessage.style.display = 'block';
+        }
       } catch (err) {
-        output.textContent = "❌ Error: " + err.message;
+        loading.style.display = 'none';
+        errorMessage.style.display = 'block';
       }
     });
+
+    updateLevelDropdown();
   </script>
 </body>
 </html>

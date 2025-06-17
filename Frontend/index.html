@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EAL Lesson Generator</title>
+  <style>
+    label { font-weight: 600; }
+    .section-title { margin-top: 1.6em; font-size: 1.15em; text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h1>EAL Lesson Generator</h1>
+  <form id="lessonForm">
+    <!-- LESSON SETUP -->
+    <div class="section-title">Lesson Setup</div>
+    <label for="primaryFocus">Primary Focus</label>
+    <select id="primaryFocus" name="primaryFocus" required>
+      <option>Reading</option>
+      <option>Writing</option>
+      <option>Listening</option>
+      <option>Speaking</option>
+      <option>Grammar</option>
+    </select><br/>
+
+    <label for="secondaryFocus">Secondary Focus (optional)</label>
+    <select id="secondaryFocus" name="secondaryFocus">
+      <option value="">None</option>
+      <option>Reading</option>
+      <option>Writing</option>
+      <option>Listening</option>
+      <option>Speaking</option>
+      <option>Grammar</option>
+    </select><br/>
+
+    <label for="framework">Language Proficiency Framework</label>
+    <select id="framework" name="framework" onchange="updateLevelOptions();toggleCustomFramework()">
+      <option value="CEFR">CEFR</option>
+      <option value="IELTS">IELTS</option>
+      <option value="Cambridge">Cambridge</option>
+      <option value="TOEFL">TOEFL</option>
+      <option value="CLB">CLB</option>
+      <option value="ACTFL">ACTFL</option>
+      <option value="GSE">GSE</option>
+      <option value="Other">Other</option>
+    </select>
+    <input type="text" id="customFramework" name="customFramework" placeholder="Please specify framework" style="display:none;"><br/>
+
+    <label for="level">Language Level</label>
+    <select id="level" name="level">
+      <!-- Options will be filled dynamically -->
+    </select>
+    <input type="text" id="customLevel" name="customLevel" placeholder="Please specify level" style="display:none;"><br/>
+
+    <label for="ageGroup">Age Group</label>
+    <select id="ageGroup" name="ageGroup">
+      <option>Early Primary (4–6)</option>
+      <option>Primary (7–10)</option>
+      <option>Secondary (11–14)</option>
+      <option>Upper Secondary (15–18)</option>
+      <option>Adults (18+)</option>
+    </select><br/>
+
+    <label for="classSize">Class Size</label>
+    <input type="number" id="classSize" name="classSize" min="1"><br/>
+
+    <label for="duration">Duration</label>
+    <select id="duration" name="duration" onchange="toggleDurationOther()">
+      <option>30 mins</option>
+      <option>45 mins</option>
+      <option>60 mins</option>
+      <option>90 mins</option>
+      <option>120 mins</option>
+      <option value="Other">Other</option>
+    </select>
+    <input type="text" id="customDuration" name="customDuration" placeholder="Please specify duration" style="display:none;"><br/>
+
+    <!-- CONTENT (OPTIONAL) -->
+    <div class="section-title">Content (Optional)</div>
+    <label for="title">Title</label>
+    <input type="text" id="title" name="title" placeholder="e.g. A Day Without Technology"><br/>
+
+    <label for="topic">Topic</label>
+    <input type="text" id="topic" name="topic" placeholder="e.g. Environment, Food, Travel, Friendship"><br/>
+
+    <label for="objectives">Learning Objectives</label><br/>
+    <textarea id="objectives" name="objectives" rows="2" placeholder="e.g. Students will be able to describe..."></textarea><br/>
+
+    <label for="targetVocab">Target Vocabulary</label><br/>
+    <textarea id="targetVocab" name="targetVocab" rows="2" placeholder="e.g. sustainable, renewable energy, climate change"></textarea><br/>
+
+    <!-- CUSTOMISATION -->
+    <div class="section-title">Customisation (Optional)</div>
+    <label for="curriculumAlignment">Curriculum Alignment</label>
+    <input type="text" id="curriculumAlignment" name="curriculumAlignment" placeholder="e.g. Cambridge IGCSE, IB MYP, Edexcel Functional Skills"><br/>
+
+    <label for="studentBackground">Student Background</label><br/>
+    <textarea id="studentBackground" name="studentBackground" rows="2" placeholder="e.g. The majority are first language Mandarin speakers, studying at an international school in Kuala Lumpur, Malaysia"></textarea><br/>
+
+    <label for="teacherNotes">Teaching Notes &amp; Pedagogy</label><br/>
+    <textarea id="teacherNotes" name="teacherNotes" rows="2" placeholder="e.g. pedagogical approach, prior learning, differentiation requirements"></textarea><br/>
+
+    <!-- ... (rest of your code above stays the same) ... -->
+
+    <button type="submit">Create Lesson</button>
+  </form>
+
+  <h3>Lesson Plan Output:</h3>
+  <pre id="responseOutput" style="white-space: pre-wrap; border: 1px solid #ccc; padding: 10px;"></pre>
+
+<!-- ... (rest of the code stays the same) ... -->
+
+
+  <script>
+    // Level options for each framework
+    const levelOptions = {
+      "CEFR": [
+        "A1", "A2", "B1", "B2", "C1"
+      ],
+      "IELTS": [
+        "3.0", "4.0", "5.0", "6.0", "7.0", "8.0"
+      ],
+      "Cambridge": [
+        "A1 Movers", "A2 Key (KET)", "B1 Preliminary (PET)", "B2 First (FCE)", "C1 Advanced (CAE)"
+      ],
+      "TOEFL": [
+        "0–40", "41–50", "51–60", "61–80", "81–100", "101–120"
+      ],
+      "CLB": [
+        "1–2", "3–4", "5–6", "7–8", "9–10", "11–12"
+      ],
+      "ACTFL": [
+        "Novice", "Intermediate", "Advanced", "Superior", "Distinguished", "Other (please specify)"
+      ],
+      "GSE": [
+        "10–29", "30–39", "40–49", "50–59", "60–69", "70–90"
+      ],
+      "Other": [] // triggers customLevel input
+    };
+
+    // Fill in the initial level options based on default framework (CEFR)
+    function updateLevelOptions() {
+      const framework = document.getElementById('framework').value;
+      const level = document.getElementById('level');
+      const customLevel = document.getElementById('customLevel');
+
+      // Remove all previous options
+      level.innerHTML = "";
+
+      if (framework === "Other") {
+        level.style.display = "none";
+        customLevel.style.display = "inline";
+      } else {
+        level.style.display = "inline";
+        customLevel.style.display = "none";
+        levelOptions[framework].forEach(opt => {
+          const option = document.createElement('option');
+          option.value = opt;
+          option.text = opt;
+          level.add(option);
+        });
+      }
+    }
+
+    // Show/hide custom framework input if 'Other' selected
+    function toggleCustomFramework() {
+      const framework = document.getElementById('framework');
+      const customInput = document.getElementById('customFramework');
+      if (framework.value === "Other") {
+        customInput.style.display = "inline";
+      } else {
+        customInput.style.display = "none";
+      }
+    }
+
+    // Show/hide custom duration input if 'Other' selected
+    function toggleDurationOther() {
+      const duration = document.getElementById('duration');
+      const customDuration = document.getElementById('customDuration');
+      if (duration.value === "Other") {
+        customDuration.style.display = "inline";
+      } else {
+        customDuration.style.display = "none";
+      }
+    }
+
+    // Fill level options on page load
+    window.onload = function() {
+      updateLevelOptions();
+    };
+
+    // Update level options when framework changes
+    document.getElementById('framework').addEventListener('change', updateLevelOptions);
+
+    // Form submission handler
+    const form = document.getElementById("lessonForm");
+    const output = document.getElementById("responseOutput");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = {
+        primaryFocus: form.primaryFocus.value,
+        secondaryFocus: form.secondaryFocus.value,
+        framework: form.framework.value === "Other" ? form.customFramework.value : form.framework.value,
+        level: form.customLevel.style.display === "inline" ? form.customLevel.value : form.level.value,
+        ageGroup: form.ageGroup.value,
+        classSize: form.classSize.value,
+        duration: form.duration.value === "Other" ? form.customDuration.value : form.duration.value,
+        title: form.title.value,
+        topic: form.topic.value,
+        objectives: form.objectives.value,
+        targetVocab: form.targetVocab.value,
+        curriculumAlignment: form.curriculumAlignment.value,
+        studentBackground: form.studentBackground.value,
+        teacherNotes: form.teacherNotes.value
+      };
+
+      try {
+        // !! Update the fetch URL if your backend is NOT on port 3000 !!
+        const res = await fetch("http://localhost:3001/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await res.json();
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        output.textContent = "❌ Error: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
